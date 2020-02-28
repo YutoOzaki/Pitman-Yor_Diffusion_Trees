@@ -1,0 +1,25 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb}
+
+\begin{document}
+\section{Piman-Yor Diffusion Trees}
+\subsection{Posterior of $p(t_v | \mathcal{T})$}	
+	
+	\begin{eqnarray}
+	p(t_v | \mathcal{T}) &=& c(1-t_v)^{cJ^{\theta,\alpha}_{\bold{n}_v} - 1} \\
+	p(\bold{z}_v | \bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) &=& (2 \pi \sigma^2(t_v - t_u))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{\sigma^2 (t_v - t_u)} \Big)\\
+	p(\bold{z}_k | \bold{z}_v, \sigma^2(t_k - t_v)\bold{I}) &=& (2 \pi \sigma^2(t_k - t_v))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_k - \bold{z}_v \parallel^2}{\sigma^2 (t_k - t_v)} \Big)\\
+	p(t_v, \bold{z}, \sigma | \mathcal{T}) & \propto & \exp \Big\{(cJ^{\theta,\alpha}_{\bold{n}_v} - 1)\ln(1 - t_v) \nonumber \\
+	 &-& \frac{D}{2} \big( \ln(t_v - t_u) + \sum_k \ln(t_k - t_v) \big) \nonumber \\
+	 &-& \frac{\parallel \bold{z}_v - \bold{z}_u\parallel^2}{2\sigma^2}\frac{1}{t_v - t_u} - \sum_k \frac{\parallel \bold{z}_k - \bold{z}_v\parallel^2}{2\sigma^2}\frac{1}{t_k - t_v} \nonumber \Big\}\\
+	 &=& u(t_v)\\
+	\frac{du}{dt_v} &=& -\frac{cJ^{\theta,\alpha}_{\bold{n}_v} - 1}{1 - t_v} - \frac{D}{2}\big( \frac{1}{t_v - t_u} - \sum_k\frac{1}{t_k - t_v}\big) \nonumber \\
+	 &+& \frac{\parallel \bold{z}_v - \bold{z}_u\parallel^2}{2\sigma^2}\frac{1}{(t_v - t_u)^2} - \sum_k \frac{\parallel \bold{z}_k - \bold{z}_v\parallel^2}{2\sigma^2}\frac{1}{(t_k - t_v)^2} \nonumber \\
+	 &=& A(t_v)\\
+	 \int \exp \big\{u(t_v)\big\} A(t_v)^{-1}du &=& \exp \big\{u(t_v)\big\} A(t_v)^{-1}\Big\vert^{t_v = 1}_{t_v = 0} \nonumber \\
+	 &=& ... \nonumber \\
+	 &=& Z
+	\end{eqnarray}
+	
+\end{document}
