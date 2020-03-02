@@ -10,16 +10,16 @@
 		c &\sim& \textrm{G}(c | a_c, b_c) \\
 		\frac{1}{\sigma^2} &\sim& \textrm{G}(\sigma^2 | a_{\sigma^2}, b_{\sigma^2}) \\
 		\alpha &\sim& \textrm{Beta}(\alpha | a_\alpha, b_\alpha) \\ 
-		\theta &\sim& \textrm{G}(\theta | a_\theta, b_\theta)
+		\theta &\sim& \textrm{G}(\theta | a_\theta, b_\theta) \\
+		p(t_v | c, \mathcal{T}) &=& c(1-t_v)^{cJ^{\theta,\alpha}_{\bold{n}_v} - 1} \\
+		p(\bold{z}_v | \bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) &=& (2 \pi \sigma^2(t_v - t_u))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{\sigma^2 (t_v - t_u)} \Big)\\
+		p(\bold{z}_k | \bold{z}_v, \sigma^2(t_k - t_v)\bold{I}) &=& (2 \pi \sigma^2(t_k - t_v))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_k - \bold{z}_v \parallel^2}{\sigma^2 (t_k - t_v)} \Big)\\
 	\end{eqnarray}
 
 
 \subsection{Posterior of $p(t_v | \mathcal{T})$}	
 	
 	\begin{eqnarray}
-	p(t_v | c, \mathcal{T}) &=& c(1-t_v)^{cJ^{\theta,\alpha}_{\bold{n}_v} - 1} \\
-	p(\bold{z}_v | \bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) &=& (2 \pi \sigma^2(t_v - t_u))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{\sigma^2 (t_v - t_u)} \Big)\\
-	p(\bold{z}_k | \bold{z}_v, \sigma^2(t_k - t_v)\bold{I}) &=& (2 \pi \sigma^2(t_k - t_v))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_k - \bold{z}_v \parallel^2}{\sigma^2 (t_k - t_v)} \Big)\\
 	p(t_v, \bold{z}_{\{u,v,k\}}, \sigma^2 | c, \mathcal{T}) & = & c(2 \pi \sigma^2)^{-\frac{D(K + 1)}{2}}\exp \Big\{(cJ^{\theta,\alpha}_{\bold{n}_v} - 1)\ln(1 - t_v) \nonumber \\
 	 & & - \frac{D}{2} \big( \ln(t_v - t_u) + \sum_k \ln(t_k - t_v) \big) \nonumber \\
 	 & & - \frac{\parallel \bold{z}_v - \bold{z}_u\parallel^2}{2\sigma^2}\frac{1}{t_v - t_u} - \sum_k \frac{\parallel \bold{z}_k - \bold{z}_v\parallel^2}{2\sigma^2}\frac{1}{t_k - t_v} \Big\}  \nonumber\\
