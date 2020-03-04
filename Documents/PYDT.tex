@@ -29,9 +29,11 @@
 	 &=& -\frac{cJ^{\theta,\alpha}_{\bold{n}_v} - 1}{1 - t_v} - \frac{1}{2(t_v - t_u)^2} \big(D(t_v - t_u) - \frac{\parallel \bold{z}_v - \bold{z}_u\parallel^2}{\sigma^2} \big) \nonumber \\
 	 & & + \sum_k \frac{1}{2(t_k - t_v)^2} \big(D(t_k - t_v) - \frac{\parallel \bold{z}_k - \bold{z}_v\parallel^2}{\sigma^2} \big) \nonumber \\
 	 &=& A(t_v)\\
-	 C_{\sigma^2} A(t_v)^{-1} \int \exp \big\{u(t_v)\big\}du &=& C_{\sigma^2} A(t_v)^{-1} \exp \big\{u(t_v)\big\}\Big\vert^{t_v = t_{k'}}_{t_v = t_u} ,\textrm{ where } t_{k'} = \min(t_k) \nonumber \\
-	 &=& A(t_{k'})^{-1}p(t_{k'}, \bold{z}_{\{u,v,k\}}, \sigma^2 | c, \mathcal{T}) - A(t_{u})^{-1}p(t_{u}, \bold{z}_{\{u,v,k\}}, \sigma^2 | c, \mathcal{T})\nonumber \\
-	 &=& Z \\
+	 C_{\sigma^2} A(t_v)^{-1} \int \exp \big\{u(t_v)\big\}du &=& Z, \textrm{ but this integral is intractable!} \\
+	 &\Rightarrow & \textrm{The range of integration w.r.t. $t_v$ is $0 < t_u \leq t_v \leq \min(t_k) < 1$, } \nonumber \\
+	 & & \textrm{obtaining $Z$ by simply summing pdf by the interval $dt = 1e^{-2}$} \nonumber \\
+	 & & \textrm{is computationally tractable for modern hardwares.} \nonumber \\
+	 & & \textrm{A few $t$ points usually give sufficient accuracy for $Z$.} \nonumber \\
 	\mathbb{E}_{p(t_v | \bold{z}_{\{u,v,k\}}, \sigma^2, c, \mathcal{T})}[t_v] &=& \frac{1}{Z} \int t_v p(t_v, \bold{z}_{\{u,v,k\}}, \sigma^2 | c, \mathcal{T}) dt_v \nonumber \\
 	&=& \frac{1}{Z} C_{\sigma^2} A_\mu(t_v)^{-1} \int \exp \big\{ u_\mu(t_v)\big\}du
 	\end{eqnarray}
