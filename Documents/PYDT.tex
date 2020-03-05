@@ -1,22 +1,45 @@
 \documentclass{article}
 
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath,amssymb, amsfonts}
 
 \begin{document}
 \section{Piman-Yor Diffusion Trees}
 \subsection{Modelling of PYDT}	
 
 	\begin{eqnarray}
-		c &\sim& \textrm{G}(c | a_c, b_c) \\
-		\frac{1}{\sigma^2} &\sim& \textrm{G}(\sigma^2 | a_{\sigma^2}, b_{\sigma^2}) \\
 		\alpha &\sim& \textrm{Beta}(\alpha | a_\alpha, b_\alpha) \\ 
 		\theta &\sim& \textrm{G}(\theta | a_\theta, b_\theta) \\
+		c &\sim& \textrm{G}(c | a_c, b_c) \nonumber \\
+		&=& \frac{b_c^{a_c}c^{a_c - 1}e^{-b_c c}}{\Gamma(a_c)} \\ 
+		1/\sigma^2 &\sim& \textrm{G}(1/\sigma^2 | a_{\sigma^2}, b_{\sigma^2}) \\
 		p(t_v | c, \mathcal{T}) &=& c(1-t_v)^{cJ^{\theta,\alpha}_{\bold{n}_v} - 1} \\
-		p(\bold{z}_v | \bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) &=& (2 \pi \sigma^2(t_v - t_u))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{\sigma^2 (t_v - t_u)} \Big)\\
-		p(\bold{z}_k | \bold{z}_v, \sigma^2(t_k - t_v)\bold{I}) &=& (2 \pi \sigma^2(t_k - t_v))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_k - \bold{z}_v \parallel^2}{\sigma^2 (t_k - t_v)} \Big)\\
+		p(\bold{z}_v | \bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) &=& (2 \pi \sigma^2(t_v - t_u))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{\sigma^2 (t_v - t_u)} \Big) \\
+		p(\bold{z}_k | \bold{z}_v, \sigma^2(t_k - t_v)\bold{I}) &=& (2 \pi \sigma^2(t_k - t_v))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_k - \bold{z}_v \parallel^2}{\sigma^2 (t_k - t_v)} \Big) \\
+		p(\bold{X}, \bold{Z} | \boldsymbol{\Theta}, \mathcal{T}) &=& \textrm{G}(c | a_c, b_c) \textrm{G}(1/\sigma^2 | a_{\sigma^2}, b_{\sigma^2}) \nonumber \\
+		& & \prod^{|\mathcal{I}|}_{v \in \mathcal{I}} p(t_v | c, \mathcal{T}) p(\bold{z}_v|\bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) \nonumber \\ 
+		& & \prod^N_{n=1} p(\bold{x}_n|\bold{z}_{pa(n)}, \sigma^2(1 - t_{pa(n)})\bold{I}) \\
+		& & \textrm{where } \bold{Z} = \{ c, \sigma^2, \bold{z}, \bold{t}\}, \boldsymbol{\Theta} = \{a_c, b_c, a_{\sigma^2}, b_{\sigma^2}\} \nonumber
 	\end{eqnarray}
 
+\subsection{EM algorithm for PYDT}	
+	\begin{eqnarray}
+		\ln P(\bold{X}|\boldsymbol{\theta}) &=& \ln \Big\{\sum_\bold{Z}P(\bold{X}, \bold{Z} | \boldsymbol{\theta}) \Big\} \nonumber \\
+		&=& \ln \Big\{\sum_\bold{Z}q(\bold{Z})\frac{P(\bold{X}, \bold{Z}|\boldsymbol{\theta})}{q(\bold{Z})} \Big\} \nonumber \\
+		&=& \sum_\bold{Z}q(\bold{Z})\ln \Big\{ \frac{P(\bold{X}, \bold{Z}| \boldsymbol{\theta})}{q(\bold{Z})} \Big\} + \sum_\bold{Z}q(\bold{Z})\ln \Big\{ \frac{q(\bold{Z})}{P(\bold{Z}|\bold{X}, \boldsymbol{\theta})} \Big\}
+	\end{eqnarray}
 
+The main procedure of the algorithm is as follows. \\
+1) Find $q(\bold{Z})$ which minimizes the KL divergence. \\
+2) Take a gradient of the ELBO w.r.t. $\boldsymbol{\theta}$ using $q(\bold{Z})$ found in the step 1).\par
+The step 2) can be written as below.
+
+	\begin{eqnarray}
+	Q(\boldsymbol{\theta}, \boldsymbol{\theta}') &=& \sum_\bold{Z}q(\bold{Z})\ln \Big\{ \frac{P(\bold{X}, \bold{Z}| \boldsymbol{\theta})}{q(\bold{Z})} \Big\} \nonumber \\
+	&=& \sum_\bold{Z}q(\bold{Z}) \ln P(\bold{X}, \bold{Z}| \boldsymbol{\theta}) - \sum_\bold{Z}q(\bold{Z})\ln q(\bold{Z})\\
+	\frac{\partial Q(\boldsymbol{\theta}, \boldsymbol{\theta}')}{\partial \boldsymbol{\theta}} &=& \sum_\bold{Z} q(\bold{Z}) \frac{\partial \ln P(\bold{X}, \bold{Z}|\boldsymbol{\theta}) }{\partial \boldsymbol{\theta}} \nonumber \\
+	&=& \sum_\bold{Z}p(\bold{Z}|\bold{X}, \boldsymbol{\theta}') \frac{\partial \ln P(\bold{X}, \bold{Z}|\boldsymbol{\theta}) }{\partial \boldsymbol{\theta}}
+	\end{eqnarray}
+	
 \subsection{Posterior of $p(t_v | \mathcal{T})$}	
 	
 	\begin{eqnarray}
