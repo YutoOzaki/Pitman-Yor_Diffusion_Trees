@@ -9,19 +9,15 @@
 	\begin{eqnarray}
 		\alpha &\sim& \textrm{Beta}(\alpha | a_\alpha, b_\alpha) \\ 
 		\theta &\sim& \textrm{G}(\theta | a_\theta, b_\theta) \\
-		c &\sim& \textrm{G}(c | a_c, b_c) \nonumber \\
-		&=& \frac{b_c^{a_c}c^{a_c - 1}e^{-b_c c}}{\Gamma(a_c)} \\ 
+		p(\mathcal{T}|\alpha, \theta) &=& \prod_{v \in \mathcal{I}} \frac{a(t_v) \prod^{K_v}_{k=3}[\theta + (k - 1)\alpha] \prod^{K_v}_{l=1} \Gamma(n^v_l - \alpha)}{\Gamma(m(v) + \theta) \Gamma(1 - \alpha)^{K_v - 1}} \\
+		c &\sim& \textrm{G}(c | a_c, b_c) \\
 		1/\sigma^2 &\sim& \textrm{G}(1/\sigma^2 | a_{\sigma^2}, b_{\sigma^2}) \\
 		p(t_v | c, \mathcal{T}) &=& c(1-t_v)^{cJ^{\theta,\alpha}_{\bold{n}_v} - 1} \\
-		p(\bold{z}_v | \bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) &=& (2 \pi \sigma^2(t_v - t_u))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{\sigma^2 (t_v - t_u)} \Big) \\
-		p(\bold{z}_k | \bold{z}_v, \sigma^2(t_k - t_v)\bold{I}) &=& (2 \pi \sigma^2(t_k - t_v))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_k - \bold{z}_v \parallel^2}{\sigma^2 (t_k - t_v)} \Big) \\
-		p(\bold{X}, \bold{Z} | \boldsymbol{\Theta}, \mathcal{T}) &=& \textrm{G}(c | a_c, b_c) \textrm{G}(1/\sigma^2 | a_{\sigma^2}, b_{\sigma^2}) \nonumber \\
-		& & \prod^{|\mathcal{I}|}_{v \in \mathcal{I}} p(t_v | c, \mathcal{T}) p(\bold{z}_v|\bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) \nonumber \\ 
-		& & \prod^N_{n=1} p(\bold{x}_n|\bold{z}_{pa(n)}, \sigma^2(1 - t_{pa(n)})\bold{I}) \\
-		& & \textrm{where } \bold{Z} = \{ c, \sigma^2, \bold{z}, \bold{t}\}, \boldsymbol{\Theta} = \{a_c, b_c, a_{\sigma^2}, b_{\sigma^2}\} \nonumber
+		\mathcal{N}(\bold{z}_v | \bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) &=& (2 \pi \sigma^2(t_v - t_u))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{\sigma^2 (t_v - t_u)} \Big) \\
+		\mathcal{N}(\bold{z}_k | \bold{z}_v, \sigma^2(t_k - t_v)\bold{I}) &=& (2 \pi \sigma^2(t_k - t_v))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_k - \bold{z}_v \parallel^2}{\sigma^2 (t_k - t_v)} \Big)
 	\end{eqnarray}
 
-\subsection{EM algorithm for PYDT}	
+	\subsection{EM algorithm for PYDT}	
 	\begin{eqnarray}
 		\ln P(\bold{X}|\boldsymbol{\theta}) &=& \ln \Big\{\sum_\bold{Z}P(\bold{X}, \bold{Z} | \boldsymbol{\theta}) \Big\} \nonumber \\
 		&=& \ln \Big\{\sum_\bold{Z}q(\bold{Z})\frac{P(\bold{X}, \bold{Z}|\boldsymbol{\theta})}{q(\bold{Z})} \Big\} \nonumber \\
@@ -40,6 +36,86 @@ The step 2) can be written as below.
 	&=& \sum_\bold{Z}p(\bold{Z}|\bold{X}, \boldsymbol{\theta}') \frac{\partial \ln P(\bold{X}, \bold{Z}|\boldsymbol{\theta}) }{\partial \boldsymbol{\theta}}
 	\end{eqnarray}
 	
+	An important point is that the EM algorithm is an algorithm designed for maximum likelihood estimation. Hence, if priors of parameters are combined in the model, EM algorithm becomes the maximum-a-posteriori EM algorithm (MAP-EM) (Gupta and Chen, 2011). Here is an example (Chen and John, 2010).
+	
+	\begin{eqnarray}
+		\mu_j &=& \mu + (j-1)\Delta\mu, j = 1,...,k \\
+		\sigma^2_j &=& \sigma^2, j = 1,...,k \\
+		p(y_j) &=& \sum^k_{j=1} w_j \frac{1}{\sqrt{2\pi \sigma^2}} \exp\Bigg(- \frac{(y_i - \mu - (j - 1)\Delta\mu)^2}{2\sigma^2} \Bigg) \\
+		\sigma^2 &\sim & \textrm{Inv-Gamma} \bigg( \frac{\nu}{2}, \frac{\zeta^2}{2} \bigg) \\
+		\Delta\mu|\sigma^2 &\sim & \mathcal{N}\bigg( \eta, \frac{\sigma^2}{\kappa} \bigg) \\
+		p(\theta) &\propto & \big (\sigma^2 \big)^{-\frac{\nu+3}{2}} \exp \bigg( -\frac{\zeta^2 + \kappa(\Delta\mu - \eta)^2}{2\sigma^2} \bigg) \\
+		\gamma^{(m)}_{ij} &\triangleq & P(Z_i = j | y_i, \theta^{(m)}) \nonumber \\
+		&=& \frac{w^{(m)}_j \phi(y_i|\mu^{(m)}_j, \sigma^{(m)})}{\sum^k_{l=1}w^{(m)}_l \phi(y_i|\mu^{(m)}_l, \sigma^{(m)})}, i=1,...,n \textrm{ and } j=1,...,k \\
+		Q(\theta | \theta^{(m)}) &=& \sum^n_{i=1} \sum^k_{j=1} \gamma^{(m)}_{ij} \ln(w_j \phi(y_i | \mu + (j-1)\Delta\mu, \sigma)) \\
+		\theta^{(m+1)} &=& \arg\max_{\theta} (Q(\theta | \theta^{(m)}) + \ln p(\theta))
+	\end{eqnarray}
+
+	
+	In case of PYDT, the MAP-EM formulation of the model is as follows.
+	
+	\begin{eqnarray}
+		p(\bold{X}, \bold{Z} | \boldsymbol{\Theta}, \mathcal{T}) &=& 
+		\prod_{[uv] \in S(\mathcal{T})'} \mathcal{N}(\bold{z}_v|\bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) \prod^N_{n=1} \mathcal{N}(\bold{x}_n|\bold{z}_{\textrm{pa}(n)}, \sigma^2(1 - t_{\textrm{pa}(n)})\bold{I}) \nonumber \\
+		& & \\
+		& & \textrm{where } \bold{Z} = \{\bold{z} \}, \boldsymbol{\Theta} = \{\bold{t}, \sigma^2\} \nonumber \\
+		p(\boldsymbol{\Theta}) &=& \textrm{G}(c | a_c, b_c) \textrm{G}(1/\sigma^2 | a_{\sigma^2}, b_{\sigma^2}) \prod_{v \in \mathcal{I}} p(t_v | c, \mathcal{T}) \\
+		Q(\boldsymbol{\Theta} | \boldsymbol{\Theta}') &=& \sum_{[uv] \in S(\mathcal{T})'} \Bigg(-\frac{D}{2}\ln2\pi\sigma^2(t_v - t_u) - \frac{ \mathbb{E}_{p(\bold{z}|\bold{x}, \bold{t}, \sigma^2)} \big[\parallel \bold{z}_v - \bold{z}_u \parallel^2 \big]}{2\sigma^2(t_v - t_u)} \Bigg) \nonumber \\
+	 	&+& \sum^N_{n=1} \Bigg(-\frac{D}{2}\ln2\pi\sigma^2(1 - t_{\textrm{pa}(n)}) - \frac{\mathbb{E}_{p(\bold{z}|\bold{x}, \bold{t}, \sigma^2)} \big[ \parallel \bold{x}_v - \bold{z}_{\textrm{pa}(n)} \parallel^2 \big]}{2\sigma^2(1 - t_{\textrm{pa}(n)})} \Bigg) \nonumber \\
+	 	& & \\
+	 	\ln p(\boldsymbol{\Theta}) &=& \Bigg(a_c \ln{b_c} + (a_c - 1)\ln{c} - b_cc - \ln{\Gamma(a_{\sigma^2})} \nonumber \\
+	 	& & + a_{\sigma^2} \ln{b_{\sigma^2}} + (a_{\sigma^2} - 1)\ln{\frac{1}{\sigma^2}} - b_{\sigma^2}\frac{1}{\sigma^2} - \ln{\Gamma(a_{\sigma^2})} \nonumber \\
+	 	& & + \sum_{v \in \mathcal{I}} (cJ^{\theta, \alpha}_{\bold{n}_v} - 1) \ln{c(1 - t_v)} \Bigg)
+	\end{eqnarray}
+	
+	However, some distributions have conjugacy. Hence, those parameters can be marginalised out and that results in the collapsed version.
+	
+	\begin{eqnarray}
+		\int \textrm{G}(c | a_c, b_c) \prod_{v \in \mathcal{I}} p(t_v | c, \mathcal{T}) dc &=& \frac{b^{a_c}_c}{\Gamma(a_c)}(1 - t_v)^{|\mathcal{I}|} \int c^{a_c - 1 + |\mathcal{I}|} \exp \Big( - \big( b_c - \sum_{v \in \mathcal{I}} J^{\theta, \alpha}_{\bold{n}_v} \ln{(1 - t_v)} \big) c \Big) dc \nonumber \\
+		&=& \frac{b^{a_c}_c}{\Gamma(a_c)}(1 - t_v)^{|\mathcal{I}|} \frac{\Gamma(a_c + |\mathcal{I}|)}{\big( b_c - \sum_{v \in \mathcal{I}} J^{\theta, \alpha}_{\bold{n}_v} \ln{(1 - t_v)} \big)^{a_c + |\mathcal{I}|}} \nonumber \\
+		&=& p(t_v | a_c, b_c, \mathcal{T})
+	\end{eqnarray}
+
+	\begin{eqnarray}
+		& & \int \textrm{G}(1/\sigma^2 | a_{\sigma^2}, b_{\sigma^2}) \prod_{[uv] \in S(\mathcal{T})'} \mathcal{N}(\bold{z}_v|\bold{z}_u, \sigma^2(t_v - t_u)\bold{I}) \prod^N_{n=1} \mathcal{N}(\bold{x}_n|\bold{z}_{\textrm{pa}(n)}, \sigma^2(1 - t_{\textrm{pa}(n)})\bold{I}) d(1/\sigma^2) \nonumber \\
+		&=& \frac{b^{a_{\sigma^2}}_{\sigma^2}}{\Gamma(a_{\sigma^2})}  2\pi^{-\frac{D}{2}(|\mathcal{I}| + N)} \int \bigg( \frac{1}{\sigma^2} \bigg)^{a_{\sigma^2} - 1 + \frac{D}{2}(|\mathcal{I}| + N)} \exp{\Bigg( - \bigg( b_{\sigma^2} + \frac{1}{2}\sum_{[uv] \in S(\mathcal{T})} \frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{t_v - t_u} \bigg) \frac{1}{\sigma^2} \Bigg)} \nonumber d(1/\sigma^2) \\
+		&=& \frac{b^{a_{\sigma^2}}_{\sigma^2}}{\Gamma(a_{\sigma^2})}  2\pi^{-\frac{D}{2}(|\mathcal{I}| + N)} \frac{\Gamma \big( a_{\sigma^2} + \frac{D}{2}(|\mathcal{I}| + N) \big)}{\Big( b_{\sigma^2} + \frac{1}{2}\sum_{[uv] \in S(\mathcal{T})'} \frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{t_v - t_u} + \frac{1}{2}\sum^N_{n=1} \frac{\parallel \bold{x}_n - \bold{z}_{\textrm{pa}(n)} \parallel^2}{1 - t_{\textrm{pa}(n)}} \Big)^{a_{\sigma^2} + \frac{D}{2}(|\mathcal{I}| + N)}} \nonumber \\
+		&=& p(\bold{X}, \bold{Z} | \bold{t}, a_{\sigma^2}, b_{\sigma^2})
+	\end{eqnarray}
+
+	\begin{eqnarray}
+		Q(\boldsymbol{\Theta} | \boldsymbol{\Theta}')
+		&=&	a_{\sigma^2}\ln{b_{\sigma^2}} - \ln{\Gamma(a_{\sigma^2})}
+		+ \ln{\Gamma \bigg(a_{\sigma^2} + \frac{D}{2}(|\mathcal{I}| + N) \bigg)}
+		\nonumber \\
+		&-& \bigg( a_{\sigma^2} + \frac{D}{2}(|\mathcal{I}| + N) \bigg)
+		\Bigg< \ln{\bigg( b_{\sigma^2} + \frac{1}{2}\sum_{[uv] \in S(\mathcal{T})'} \frac{\parallel \bold{z}_v - \bold{z}_u \parallel^2}{t_v - t_u} + \frac{1}{2}\sum^N_{n=1} \frac{\parallel \bold{x}_n - \bold{z}_{\textrm{pa}(n)} \parallel^2}{1 - t_{\textrm{pa}(n)}} \bigg)} \Bigg>
+		\nonumber \\
+		&+& \textrm{Const.}
+	\end{eqnarray}
+
+	\begin{eqnarray}
+		\ln{p(\boldsymbol{\Theta})} 
+		&=& \sum_{v \in \mathcal{I}}	 \bigg(
+		a_c\ln{b_c} - \ln{\Gamma(a_c)} + |\mathcal{I}|\ln{(1 - t_v)} 
+		\nonumber \\
+		& & + \ln{\Gamma(a_c + |\mathcal{I}|)}
+		- (a_c + \mathcal{I})\ln{\Big( b_c - \sum_{v \in \mathcal{I}}J^{\theta, \alpha}_{\bold{n}_v} \ln{(1 - t_v)} \Big)} \bigg)
+		\nonumber \\
+		&=& |\mathcal{I}|\big( a_c\ln{b_c} - \ln{\Gamma(a_c)} + \ln{\Gamma(a_c + |\mathcal{I}|)} \big)
+		\nonumber \\
+		& & + \sum_{v \in \mathcal{I}} \bigg( |\mathcal{I}|\ln{(1 - t_v)} - (a_c + \mathcal{I})\ln{\Big( b_c - \sum_{v \in \mathcal{I}}J^{\theta, \alpha}_{\bold{n}_v} \ln{(1 - t_v)} \Big)} \bigg)
+		\nonumber \\
+	\end{eqnarray}
+
+	\begin{eqnarray}
+	\frac{\partial \big( Q(\boldsymbol{\Theta}|\boldsymbol{\Theta}') + \ln{p(\boldsymbol{\Theta})} \big)}{\partial t_v} \\
+	\frac{\partial \big( Q(\boldsymbol{\Theta}|\boldsymbol{\Theta}') + \ln{p(\boldsymbol{\Theta})} \big)}{\partial a_{\sigma^2}} \\
+	\frac{\partial \big( Q(\boldsymbol{\Theta}|\boldsymbol{\Theta}') + \ln{p(\boldsymbol{\Theta})} \big)}{\partial b_{\sigma^2}} \\
+	\frac{\partial \big( Q(\boldsymbol{\Theta}|\boldsymbol{\Theta}') + \ln{p(\boldsymbol{\Theta})} \big)}{\partial a_c} \\
+	\frac{\partial \big( Q(\boldsymbol{\Theta}|\boldsymbol{\Theta}') + \ln{p(\boldsymbol{\Theta})} \big)}{\partial b_c}
+	\end{eqnarray}
+
 \subsection{Posterior of $p(t_v | \mathcal{T})$}	
 	
 	\begin{eqnarray}
@@ -56,7 +132,7 @@ The step 2) can be written as below.
 	 &\Rightarrow & \textrm{The range of integration w.r.t. $t_v$ is $0 < t_u \leq t_v \leq \min(t_k) < 1$, } \nonumber \\
 	 & & \textrm{obtaining $Z$ by simply summing pdf by the interval $dt = 1e^{-2}$} \nonumber \\
 	 & & \textrm{is computationally tractable for modern hardwares.} \nonumber \\
-	 & & \textrm{A few $t$ points usually give sufficient accuracy for $Z$.} \nonumber \\
+	 & & \textrm{A few $t$ points usually give sufficient accuracy.} \nonumber \\
 	\mathbb{E}_{p(t_v | \bold{z}_{\{u,v,k\}}, \sigma^2, c, \mathcal{T})}[t_v] &=& \frac{1}{Z} \int t_v p(t_v, \bold{z}_{\{u,v,k\}}, \sigma^2 | c, \mathcal{T}) dt_v \nonumber \\
 	&=& \frac{1}{Z} C_{\sigma^2} A_\mu(t_v)^{-1} \int \exp \big\{ u_\mu(t_v)\big\}du
 	\end{eqnarray}
