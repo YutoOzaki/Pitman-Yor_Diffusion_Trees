@@ -51,7 +51,6 @@ The step 2) can be written as below.
 		\theta^{(m+1)} &=& \arg\max_{\theta} (Q(\theta | \theta^{(m)}) + \ln p(\theta))
 	\end{eqnarray}
 
-	
 	In case of PYDT, the MAP-EM formulation of the model is as follows.
 	
 	\begin{eqnarray}
@@ -114,6 +113,20 @@ The step 2) can be written as below.
 	\frac{\partial \big( Q(\boldsymbol{\Theta}|\boldsymbol{\Theta}') + \ln{p(\boldsymbol{\Theta})} \big)}{\partial b_{\sigma^2}} \\
 	\frac{\partial \big( Q(\boldsymbol{\Theta}|\boldsymbol{\Theta}') + \ln{p(\boldsymbol{\Theta})} \big)}{\partial a_c} \\
 	\frac{\partial \big( Q(\boldsymbol{\Theta}|\boldsymbol{\Theta}') + \ln{p(\boldsymbol{\Theta})} \big)}{\partial b_c}
+	\end{eqnarray}
+
+\subsection{Posterior of $p(\bold{z}_v | \bold{z}_{\{u, k\}}, t_{\{u, v, k\}}, \sigma^2, \mathcal{T})$}	
+
+The posterior distribution of $\bold{z}$ can be obtained by formulating the below joint distribution as a normal distribution. There is conjugacy among the distributions because the prior of mean is modelled as a normal distribution.
+
+	\begin{eqnarray}
+	\mathcal{N}(\bold{z}_v | \bold{z}_u, \sigma^2(t_v - t_u)\bold{I})
+	\prod^{K}_{k=1} \mathcal{N}(\bold{z}_k | \bold{z}_v, \sigma^2(t_k - t_v)\bold{I})
+	\end{eqnarray}
+
+	\begin{eqnarray}
+	p(\bold{z}_v | \bold{z}_{\{u, k\}}, t_{\{u, v, k\}}, \sigma^2, \mathcal{T}) = \mathcal{N} \Bigg( \bold{z}_v \Bigg| r \bigg( \frac{\bold{z}_u}{t_v - t_u} + \sum_k \frac{\bold{z}_k}{t_k - t_v} \bigg), r\sigma^2\bold{I} \Bigg) \\
+	\textrm{where } r = \bigg( \frac{1}{t_v - t_u} + \sum_k \frac{1}{t_k - t_v} \bigg)^{-1} \nonumber
 	\end{eqnarray}
 
 \subsection{Posterior of $p(t_v | \mathcal{T})$}	
