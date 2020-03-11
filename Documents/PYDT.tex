@@ -17,7 +17,7 @@
 		\mathcal{N}(\bold{z}_k | \bold{z}_v, \sigma^2(t_k - t_v)\bold{I}) &=& (2 \pi \sigma^2(t_k - t_v))^{-\frac{D}{2}} \exp \Big(-\frac{1}{2}\frac{\parallel \bold{z}_k - \bold{z}_v \parallel^2}{\sigma^2 (t_k - t_v)} \Big)
 	\end{eqnarray}
 
-	\subsection{EM algorithm for PYDT}	
+	\subsection{EM algorithm for PYDT}
 	\begin{eqnarray}
 		\ln P(\bold{X}|\boldsymbol{\theta}) &=& \ln \Big\{\sum_\bold{Z}P(\bold{X}, \bold{Z} | \boldsymbol{\theta}) \Big\} \nonumber \\
 		&=& \ln \Big\{\sum_\bold{Z}q(\bold{Z})\frac{P(\bold{X}, \bold{Z}|\boldsymbol{\theta})}{q(\bold{Z})} \Big\} \nonumber \\
@@ -62,7 +62,7 @@ The step 2) can be written as below.
 		Q(\boldsymbol{\Theta} | \boldsymbol{\Theta}') &=& \sum_{[uv] \in S(\mathcal{T})'} \Bigg(-\frac{D}{2}\ln2\pi\sigma^2(t_v - t_u) - \frac{ \mathbb{E}_{p(\bold{z}|\bold{x}, \bold{t}, \sigma^2)} \big[\parallel \bold{z}_v - \bold{z}_u \parallel^2 \big]}{2\sigma^2(t_v - t_u)} \Bigg) \nonumber \\
 	 	&+& \sum^N_{n=1} \Bigg(-\frac{D}{2}\ln2\pi\sigma^2(1 - t_{\textrm{pa}(n)}) - \frac{\mathbb{E}_{p(\bold{z}|\bold{x}, \bold{t}, \sigma^2)} \big[ \parallel \bold{x}_v - \bold{z}_{\textrm{pa}(n)} \parallel^2 \big]}{2\sigma^2(1 - t_{\textrm{pa}(n)})} \Bigg) \nonumber \\
 	 	& & \\
-	 	\ln p(\boldsymbol{\Theta}) &=& \Bigg(a_c \ln{b_c} + (a_c - 1)\ln{c} - b_cc - \ln{\Gamma(a_{\sigma^2})} \nonumber \\
+	 	\ln p(\boldsymbol{\Theta}) &=& \Bigg(a_c \ln{b_c} + (a_c - 1)\ln{c} - b_cc - \ln{\Gamma(a_c)} \nonumber \\
 	 	& & + a_{\sigma^2} \ln{b_{\sigma^2}} + (a_{\sigma^2} - 1)\ln{\frac{1}{\sigma^2}} - b_{\sigma^2}\frac{1}{\sigma^2} - \ln{\Gamma(a_{\sigma^2})} \nonumber \\
 	 	& & + \sum_{v \in \mathcal{I}} (cJ^{\theta, \alpha}_{\bold{n}_v} - 1) \ln{c(1 - t_v)} \Bigg)
 	\end{eqnarray}
@@ -149,5 +149,38 @@ The posterior distribution of $\bold{z}$ can be obtained by formulating the belo
 	\mathbb{E}_{p(t_v | \bold{z}_{\{u,v,k\}}, \sigma^2, c, \mathcal{T})}[t_v] &=& \frac{1}{Z} \int t_v p(t_v, \bold{z}_{\{u,v,k\}}, \sigma^2 | c, \mathcal{T}) dt_v \nonumber \\
 	&=& \frac{1}{Z} C_{\sigma^2} A_\mu(t_v)^{-1} \int \exp \big\{ u_\mu(t_v)\big\}du
 	\end{eqnarray}
+	
+	\subsection{Approximation of model evidence}
+	Use the decomposition with variational distributions.
+	
+	\begin{eqnarray}
+		\ln P(\bold{X}|\boldsymbol{\theta}) &=& \ln \Big\{\sum_\bold{Z}P(\bold{X}, \bold{Z} | \boldsymbol{\theta}) \Big\} \nonumber \\
+		&=& \ln \Big\{\sum_\bold{Z}q(\bold{Z})\frac{P(\bold{X}, \bold{Z}|\boldsymbol{\theta})}{q(\bold{Z})} \Big\} \nonumber \\
+		&=& \sum_\bold{Z}q(\bold{Z})\ln \Big\{ \frac{P(\bold{X}, \bold{Z}| \boldsymbol{\theta})}{q(\bold{Z})} \Big\} + \sum_\bold{Z}q(\bold{Z})\ln \Big\{ \frac{q(\bold{Z})}{P(\bold{Z}|\bold{X}, \boldsymbol{\theta})} \Big\}
+	\end{eqnarray}
+	
+	$\bold{z}, c, \sigma^2$ have analytical posterior. In addition, the exact posterior of $\bold{t}$ can also be computed in a feasible way up to the error due to the finite numerical precision. Hence, we consider that the second term of (40), which is a Kullback-divergence of the calculated posterior and theoretical posterior in this context, vanishes.
+	
+	\begin{eqnarray}
+		& & \sum_\bold{Z}q(\bold{Z})\ln \Big\{ \frac{P(\bold{X}, \bold{Z}| \boldsymbol{\theta})}{q(\bold{Z})} \Big\} \nonumber \\
+		&=& \mathbb{E}_{q(\bold{Z})} \big[ \ln{P(\bold{X}, \bold{Z}|\boldsymbol{\theta})} \big]	+ H_{q}(\bold{Z})
+		\nonumber \\
+		&=& a_c\ln{b_c} + (a_c - 1)\mathbb{E}[\ln{c}] - b_c\mathbb{E}[c] -\ln{\Gamma(a_c)} \nonumber \\
+		& & + a_{\sigma^2}\ln{b_{\sigma^2}} + (a_{\sigma^2} - 1)\mathbb{E}\bigg[ \ln{\frac{1}{\sigma^2}} \bigg] - b_{\sigma^2}\mathbb{E}\bigg[ \frac{1}{\sigma^2} \bigg] - \ln{\Gamma(a_{\sigma^2})} \nonumber \\
+		& & + \sum_{v \in \mathcal{I}} \Big\{ \big( \mathbb{E}[c]J^{\theta, \alpha}_{\bold{n}_v} - 1 \big) \mathbb{E}[\ln{c}] + \big( \mathbb{E}[c]J^{\theta, \alpha}_{\bold{n}_v} - 1 \big)\mathbb{E} \big[ \ln{(1 - t_v)} \big] \Big\} \nonumber \\
+		& & + \sum_{[uv] \in S(\mathcal{T})'} \Bigg\{-\frac{D}{2} \bigg(\ln{2\pi} - \mathbb{E}\bigg[ \ln{\frac{1}{\sigma^2}} \bigg] + \mathbb{E} \big[ \ln{(t_v - t_u) \big]} \bigg) \nonumber \\
+		& & - \mathbb{E}\bigg[ \frac{1}{\sigma^2} \bigg] \mathbb{E}\bigg[ \frac{1}{t_v - t_u} \bigg] \frac{ \sum^D_{d=1} \mathbb{E} [z_{v,d}^2] - 2\mathbb{E}[z_{v,d}]\mathbb{E}[z_{u,d}] + \mathbb{E}[z_{u,d}^2] \big]}{2} \Bigg\} \nonumber \\
+	 	& & + \sum^N_{n=1} \Bigg\{-\frac{D}{2} \bigg( \ln{2\pi} - \ln{\frac{1}{\sigma^2}} + \ln(1 - t_{\textrm{pa}(n)}) \bigg) \nonumber \\
+	 	& & - \mathbb{E}\bigg[ \frac{1}{\sigma^2} \bigg] \mathbb{E}\bigg[ \frac{1}{1 - t_{\textrm{pa}(n)}} \bigg] \frac{\sum^D_{d=1} \mathbb{E}[x^2_{v,d}] - 2\mathbb{E}[x_{n, d}]\mathbb{E}[z_{\textrm{pa}(n), d}] + \mathbb{E}[z^2_{\textrm{pa}(n), d}] \big]}{2} \Bigg\} \nonumber \\
+	 	& & + H_q(\bold{Z})
+	\end{eqnarray}
+	\begin{eqnarray}
+		\mathbb{E}[\ln{c}] &\approx & \ln{\mathbb{E}[c]} - \frac{\mathbb{V}[c]}{2\mathbb{E}[c]^2} \nonumber \\
+		&=& \ln{ \big( a_c + |\mathcal{I}| \big)} - \ln{ \Big( b_c - \sum_{v \in \mathcal{I}}J^{\theta, \alpha}_{\bold{n}_v}\ln{(1 - t_v})\Big)} + \frac{1}{2 \big( a_c + |\mathcal{I}| \big)} \\
+		\mathbb{E} \bigg[ \ln{\frac{1}{\sigma^2}} \bigg] &\approx & \ln{\mathbb{E} \bigg[ \frac{1}{\sigma^2} \bigg]} - \frac{\mathbb{V}\bigg[ \frac{1}{\sigma^2} \bigg]}{2\mathbb{E}\bigg[ \frac{1}{\sigma^2} \bigg]^2} \nonumber \\
+		&=& \ln{ \big( a_{\sigma^2} + \frac{D(|\mathcal{I} + N|)}{2} \big) } - \ln{ \Big( b_{\sigma^2} + \frac{1}{2}\sum_{[uv] \in S(\mathcal{T})}\frac{\sum^D_{d=1}(z_{v,d} - z_{u,d})^2}{t_v - t_u}\Big)} + \frac{1}{2 \big( a_{\sigma^2} + \frac{D(|\mathcal{I} + N|)}{2} \big)}	 \nonumber \\
+		\mathbb{E} \big[ \ln{(1 - t_v)} \big] &\approx & \ln{ \big( 1 - \mathbb{E}[t_v] \big)} - \frac{\mathbb{V}[t_v]}{2 \big( 1 - \mathbb{E}[t_v] \big)^2}
+	\end{eqnarray}
+
 	
 \end{document}
